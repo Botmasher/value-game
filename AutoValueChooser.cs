@@ -7,6 +7,7 @@ public class AutoValueChooser : MonoBehaviour {
 	public UnityEngine.UI.Text textBox;
 	public static float[] trueValues;
 
+
 	void Start () {
 		textBox.text = "";
 		trueValues = new float[3];
