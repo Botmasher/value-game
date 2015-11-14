@@ -17,12 +17,13 @@ public class PlayerPaint : MonoBehaviour {
 	public List<UnityEngine.UI.Text> textLeft;
 	public List<UnityEngine.UI.Text> textRight;
 	public UnityEngine.UI.Text textAnswer;
-	
-	// for determining if player can act
-	public static bool myTurn;
 
-	// for determining if player can select an object to color
-	private bool isPicking;
+	// screen over images
+	public UnityEngine.UI.Image screenFader;
+	
+	// control flow
+	public static bool myTurn;				// for determining if player can act
+	private bool isPicking;					// for determining if player can select an object to color
 
 	// for storing player answers
 	float[] myValues;
@@ -36,7 +37,7 @@ public class PlayerPaint : MonoBehaviour {
 	public static Color brushColor;
 
 
-	void Awake () {
+	void Start () {
 		// clear UI
 		for (int i=0; i<textCenter.Count; i++) {
 			textCenter[i].text = "";
@@ -45,6 +46,10 @@ public class PlayerPaint : MonoBehaviour {
 		}
 		textAnswer.text = "";
 
+		// fade in screen at beginning of game
+		screenFader.enabled = true;
+		screenFader.CrossFadeAlpha(0f,1f,false);
+		
 		// set initial values
 		myTurn = false;
 		brushColor = Color.white;
@@ -62,7 +67,7 @@ public class PlayerPaint : MonoBehaviour {
 		if (myTurn) {
 
 			// turn on the end round button at the start of your turn
-			if (!gameOverButton.activeSelf) {
+			if (!gameOverButton.activeSelf && !isPicking) {
 				gameOverButton.SetActive (true);
 			}
 
@@ -72,25 +77,26 @@ public class PlayerPaint : MonoBehaviour {
 				Physics.Raycast(ray, out hit);
 
 				// hit paint target - bring up picker and remember this object
-				if (hit.collider.tag == "Paint" && !isPicking) {
+				if (hit.collider != null && hit.collider.tag == "Paint" && !isPicking) {
 					// 
 					lastSelected = hit.collider.gameObject;
 					// calibrate and toggle the value picker-slider
 					isPicking = true;
 					picker.SetActive (true);
 					inputText.gameObject.SetActive (true);
+					gameOverButton.SetActive (false);
 					brushColor = lastSelected.GetComponent<MeshRenderer>().material.color;
-					inputText.text = Mathf.RoundToInt(brushColor.r*255).ToString();
+					inputText.text = Mathf.RoundToInt(brushColor.r*100f).ToString();
 				
 				// hit okay button - confirm value and hide picker
-				} else if (hit.collider.gameObject == pickerButton) {
+				} else if (hit.collider != null && hit.collider.gameObject == pickerButton) {
 					isPicking = false;
 					picker.SetActive (false);
 					inputText.gameObject.SetActive (false);
 					lastSelected.GetComponent<MeshRenderer>().material.color = brushColor;
 				
 				// hit gameover button - end round and tally score
-				} else if (hit.collider.gameObject == gameOverButton) {
+				} else if (hit.collider != null && hit.collider.gameObject == gameOverButton) {
 					StartCoroutine ("EndRound");
 				}
 
@@ -100,12 +106,12 @@ public class PlayerPaint : MonoBehaviour {
 				Physics.Raycast(ray, out hit);
 
 				// choose and store the player picked color along this gradient
-				if (hit.collider.gameObject == picker) {
+				if (hit.collider != null && hit.collider.gameObject == picker) {
 					// analyze the texture pixels on this object for the value at this mouse position
 					tex = hit.collider.GetComponent<MeshRenderer>().material.mainTexture as Texture2D;
 					brushColor = tex.GetPixel ((int)(hit.textureCoord.x*tex.width), (int)(hit.textureCoord.y*tex.height));
 					// set the clicked object to this value
-					inputText.text = Mathf.RoundToInt(brushColor.r*255).ToString();
+					inputText.text = Mathf.RoundToInt(brushColor.r*100f).ToString();
 					lastSelected.GetComponent<MeshRenderer>().material.color = brushColor;
 				}
 
@@ -113,8 +119,8 @@ public class PlayerPaint : MonoBehaviour {
 			} else if (isPicking) {
 				int this_integer;
 				if (int.TryParse (inputText.text, out this_integer)) {
-					this_integer = Mathf.Clamp (this_integer, 0, 255);
-					inputValue = this_integer/255f;
+					this_integer = Mathf.Clamp (this_integer, 0, 100);
+					inputValue = this_integer/100f;
 					brushColor = new Color (inputValue, inputValue, inputValue);
 				}
 				lastSelected.GetComponent<MeshRenderer>().material.color = brushColor;
@@ -141,36 +147,41 @@ public class PlayerPaint : MonoBehaviour {
 		textCenter[1].text = "";
 		textCenter[1].CrossFadeAlpha (1f, 0f, false);
 
-		// message user - score versus score
-
-
 		// compile list of answers for final check
 		for (int i=0; i<this.transform.childCount; i++) {
 			myValues[i] = this.transform.GetChild(i).GetComponent<MeshRenderer>().material.color.r;
 		}
 
-		// display your values versus AI values
-
-		// check through each value versus true value and calculate error diff
+		// compare your values versus true values and show error diff
 		float howMuchOff = 0f;
 		yield return new WaitForSeconds (0.2f);
 		for (int i=0; i<AutoValueChooser.trueValues.Length; i++) {
+
 			// display your value then wait
-			textRight[i].text = string.Format("{0}", Mathf.RoundToInt(myValues[i]*255f));
+			textRight[i].text = string.Format("{0}", Mathf.RoundToInt(myValues[i]*100f));
 			yield return new WaitForSeconds(0.5f);
+
 			// display true value then wait
-			textLeft[i].text = string.Format("{0}", Mathf.RoundToInt(AutoValueChooser.trueValues[i]*255f));
+			textLeft[i].text = string.Format("{0}", Mathf.RoundToInt(AutoValueChooser.trueValues[i]*100f));
 			yield return new WaitForSeconds(0.5f);
+
 			// display difference
-			textRight[i].text = "";
-			textLeft[i].text = "";
+//			textRight[i].text = "";
+//			textLeft[i].text = "";
 			howMuchOff += Mathf.Abs (AutoValueChooser.trueValues[i] - myValues[i]);
-			textCenter[i].text = string.Format("{0}", Mathf.RoundToInt(Mathf.Abs(AutoValueChooser.trueValues[i] - myValues[i])*255f));
+			textCenter[i].text = string.Format("{0}", Mathf.RoundToInt(Mathf.Abs(AutoValueChooser.trueValues[i] - myValues[i])*100f));
 			yield return new WaitForSeconds(1.5f);
 		}
 
 		// display final score
-		textAnswer.text = string.Format("{0}", (Mathf.RoundToInt(howMuchOff*255f)) );
+		textAnswer.text = string.Format("{0}", (Mathf.RoundToInt(howMuchOff*100f)) );
+
+		yield return new WaitForSeconds (1.2f);
+		screenFader.CrossFadeAlpha (1f, 2f, false);
+		yield return new WaitForSeconds (2f);
+		textAnswer.CrossFadeAlpha (0f, 1.8f, false);
+		yield return new WaitForSeconds (2f);
+		Application.LoadLevel ("scene-menu");
 	}
 
 
