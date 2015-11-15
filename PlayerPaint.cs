@@ -111,31 +111,52 @@ public class PlayerPaint : MonoBehaviour {
 					StartCoroutine ("EndRound");
 				}
 
-			// drag mouse along value picker - update this color based on exact value texture pixel
-			} else if (Input.GetMouseButton(0)) {
-				ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-				Physics.Raycast(ray, out hit);
+//			// drag mouse along value picker - update this color based on exact value texture pixel
+//			} else if (Input.GetMouseButton(0)) {
+//				ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+//				Physics.Raycast(ray, out hit);
+//
+//				// choose and store the player picked color along this gradient
+//				if (hit.collider != null && hit.collider.gameObject == picker) {
+//					// analyze the texture pixels on this object for the value at this mouse position
+//					tex = hit.collider.GetComponent<MeshRenderer>().material.mainTexture as Texture2D;
+//					brushColor = tex.GetPixel ((int)(hit.textureCoord.x*tex.width), (int)(hit.textureCoord.y*tex.height));
+//					// set the clicked object to this value
+//					//inputText.text = Mathf.RoundToInt(brushColor.r*100f).ToString();
+//					lastSelected.GetComponent<MeshRenderer>().material.color = brushColor;
+//				}
 
-				// choose and store the player picked color along this gradient
-				if (hit.collider != null && hit.collider.gameObject == picker) {
-					// analyze the texture pixels on this object for the value at this mouse position
-					tex = hit.collider.GetComponent<MeshRenderer>().material.mainTexture as Texture2D;
-					brushColor = tex.GetPixel ((int)(hit.textureCoord.x*tex.width), (int)(hit.textureCoord.y*tex.height));
-					// set the clicked object to this value
-					inputText.text = Mathf.RoundToInt(brushColor.r*100f).ToString();
-					lastSelected.GetComponent<MeshRenderer>().material.color = brushColor;
-				}
-
-			// take input from the input box
+			// pick a value from slider or input field
 			} else if (isPicking) {
+
+				// input field text - parse the integer
 				int this_integer;
-				if (int.TryParse (inputText.text, out this_integer)) {
+				if (inputText.text == "") {
+					// do nothing
+				} else if (int.TryParse (inputText.text, out this_integer)) {
 					this_integer = Mathf.Clamp (this_integer, 0, 100);
+					// set the brush value to this integer
 					inputValue = this_integer/100f;
 					brushColor = new Color (inputValue, inputValue, inputValue);
 				}
+
+				// slider bar texture - determine the tex value at this input position
+				if (Input.GetMouseButton(0)) {
+					ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+					Physics.Raycast(ray, out hit);
+
+					// choose and store the player picked color along this gradient
+					if (hit.collider != null && hit.collider.gameObject == picker) {
+						// analyze the texture pixels on this object for the value at this mouse position
+						tex = hit.collider.GetComponent<MeshRenderer>().material.mainTexture as Texture2D;
+						brushColor = tex.GetPixel ((int)(hit.textureCoord.x*tex.width), (int)(hit.textureCoord.y*tex.height));
+					}
+				}
+				// update the object and text to reflect the chosen value
 				lastSelected.GetComponent<MeshRenderer>().material.color = brushColor;
+				inputText.text = Mathf.RoundToInt(brushColor.r*100f).ToString();
 			}
+
 		}
 
 	}
