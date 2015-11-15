@@ -42,9 +42,9 @@ public class AutoValueChooser : MonoBehaviour {
 		textLeft[index].CrossFadeAlpha(0f,0f,false);
 		textLeft[index].CrossFadeAlpha(1f,0.6f,false);
 		textLeft[index].text = "Picking a value...";
-		yield return new WaitForSeconds (1f);
+		yield return new WaitForSeconds (0.8f);
 		textLeft[index].CrossFadeAlpha(0f,0.8f,false);
-		yield return new WaitForSeconds (1f);
+		yield return new WaitForSeconds (0.8f);
 		textLeft[index].text = "";
 		textLeft[index].CrossFadeAlpha(1f,0f,false);
 		
@@ -74,7 +74,7 @@ public class AutoValueChooser : MonoBehaviour {
 		textBox.CrossFadeAlpha(0f,0f,false);
 		textBox.CrossFadeAlpha(1f,0.5f,false);
 		textBox.text = "Try to match my values!";
-		yield return new WaitForSeconds (1.2f);
+		yield return new WaitForSeconds (1.3f);
 
 		// fade text out and reset it
 		textBox.CrossFadeAlpha(0f,0.5f,false);

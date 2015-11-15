@@ -18,9 +18,10 @@ public class PlayerPaint : MonoBehaviour {
 	public List<UnityEngine.UI.Text> textRight;
 	public UnityEngine.UI.Text textAnswer;
 
-	// screen over images
-	public UnityEngine.UI.Image screenFader;
-	
+	// screen images
+	public UnityEngine.UI.Image screenFader;	// UI fade to color
+	public GameObject midlineImage;				// line drawn in middle of board
+
 	// control flow
 	public static bool myTurn;				// for determining if player can act
 	private bool isPicking;					// for determining if player can select an object to color
@@ -49,11 +50,16 @@ public class PlayerPaint : MonoBehaviour {
 		// fade in screen at beginning of game
 		screenFader.enabled = true;
 		screenFader.CrossFadeAlpha(0f,1f,false);
-		
-		// set initial values
-		myTurn = false;
-		brushColor = Color.white;
+
+		// hide divider line and roundover button
 		gameOverButton.SetActive (false);
+		midlineImage.SetActive (false);
+
+		// wait for AI to take turn
+		myTurn = false;
+
+		// setup value picker
+		brushColor = Color.white;
 		isPicking = false;
 		picker.SetActive (false);
 		inputText.gameObject.SetActive (false);
@@ -65,6 +71,11 @@ public class PlayerPaint : MonoBehaviour {
 
 		// only run once AI has chosen
 		if (myTurn) {
+
+			// turn on center divider line
+			if (!midlineImage.activeSelf) {
+				midlineImage.SetActive (true);
+			}
 
 			// turn on the end round button at the start of your turn
 			if (!gameOverButton.activeSelf && !isPicking) {
@@ -134,8 +145,10 @@ public class PlayerPaint : MonoBehaviour {
 	 * 	Finish round, compare player values to AI and tally score
 	 */
 	IEnumerator EndRound () {
+		// turn off gameplay elements
 		myTurn = false;
 		gameOverButton.SetActive (false);
+		midlineImage.SetActive (false);
 
 		// message user - tallying score
 		textCenter[1].CrossFadeAlpha (0f, 0f, false);
@@ -153,7 +166,7 @@ public class PlayerPaint : MonoBehaviour {
 		}
 
 		// compare your values versus true values and show error diff
-		float howMuchOff = 0f;
+		int howMuchOff = 0;
 		yield return new WaitForSeconds (0.2f);
 		for (int i=0; i<AutoValueChooser.trueValues.Length; i++) {
 
@@ -168,13 +181,13 @@ public class PlayerPaint : MonoBehaviour {
 			// display difference
 //			textRight[i].text = "";
 //			textLeft[i].text = "";
-			howMuchOff += Mathf.Abs (AutoValueChooser.trueValues[i] - myValues[i]);
+			howMuchOff += Mathf.RoundToInt(Mathf.Abs (AutoValueChooser.trueValues[i] - myValues[i])*100f);
 			textCenter[i].text = string.Format("{0}", Mathf.RoundToInt(Mathf.Abs(AutoValueChooser.trueValues[i] - myValues[i])*100f));
 			yield return new WaitForSeconds(1.5f);
 		}
 
 		// display final score
-		textAnswer.text = string.Format("{0}", (Mathf.RoundToInt(howMuchOff*100f)) );
+		textAnswer.text = string.Format("{0}", howMuchOff);
 
 		yield return new WaitForSeconds (1.2f);
 		screenFader.CrossFadeAlpha (1f, 2f, false);
