@@ -22,8 +22,18 @@ public class MenuManager : MonoBehaviour {
 	// control flow
 	private bool isUsingMenu;
 
+	// art images to fade in and out over time
+	public List<Image> pics;
+	private Image thisPic;
+
 
 	void Start () {
+
+		// cycle art images on title screen
+		for (int i=0; i<pics.Count; i++) {
+			pics[i].CrossFadeAlpha(0f,0f,false);
+		}
+		StartCoroutine ("CyclePics");
 
 		// fade in from overlay image
 		screenFader.CrossFadeAlpha (0f, 3f, false);
@@ -51,7 +61,7 @@ public class MenuManager : MonoBehaviour {
 
 			// hover over start
 			if (hit.collider.gameObject == startButton) {
-				texts[0].fontSize = 35;
+				texts[0].fontSize = 48;
 				texts[1].fontSize = 24;
 				// select start
 				if (Input.GetMouseButtonDown (0)) {
@@ -61,7 +71,7 @@ public class MenuManager : MonoBehaviour {
 			// hover over about
 			} else if (hit.collider.gameObject == aboutButton) {
 				texts[1].fontSize = 30;
-				texts[0].fontSize = 30;
+				texts[0].fontSize = 45;
 				// select about
 				if (Input.GetMouseButtonDown(0)) {
 					Application.OpenURL("https://www.youtube.com/watch?v=J5zVFlMQZEs");
@@ -70,7 +80,7 @@ public class MenuManager : MonoBehaviour {
 
 		// not interacting with menu
 		} else {
-			texts[0].fontSize = 30;
+			texts[0].fontSize = 45;
 			texts[1].fontSize = 24;
 		}
 	
@@ -109,6 +119,23 @@ public class MenuManager : MonoBehaviour {
 		yield return new WaitForSeconds (1.3f);
 		Application.LoadLevel ("scene-main");
 
+	}
+
+
+	/**
+	 * 	Fade images in and out over time
+	 */
+	IEnumerator CyclePics () {
+		Image nextPic = pics[Random.Range(0,pics.Count)];
+		if (thisPic != nextPic || thisPic == null) {
+			thisPic = nextPic;
+			thisPic.CrossFadeAlpha (0.2f, 2f, false);
+			yield return new WaitForSeconds(2f);
+			thisPic.CrossFadeAlpha (0f, 2f, false);
+			yield return new WaitForSeconds (2f);
+		}
+		StartCoroutine ("CyclePics");
+		yield return null;
 	}
 
 }
