@@ -129,10 +129,10 @@ public class MenuManager : MonoBehaviour {
 		Image nextPic = pics[Random.Range(0,pics.Count)];
 		if (thisPic != nextPic || thisPic == null) {
 			thisPic = nextPic;
-			thisPic.CrossFadeAlpha (0.2f, 2f, false);
-			yield return new WaitForSeconds(2f);
-			thisPic.CrossFadeAlpha (0f, 2f, false);
-			yield return new WaitForSeconds (2f);
+			thisPic.CrossFadeAlpha (0.28f, 4f, false);
+			yield return new WaitForSeconds(5f);
+			thisPic.CrossFadeAlpha (0f, 4f, false);
+			yield return new WaitForSeconds (6f);
 		}
 		StartCoroutine ("CyclePics");
 		yield return null;
