@@ -89,7 +89,7 @@ public class PlayerPaint : MonoBehaviour {
 
 				// hit paint target - bring up picker and remember this object
 				if (hit.collider != null && hit.collider.tag == "Paint" && !isPicking) {
-					// 
+					// remember the clicked object
 					lastSelected = hit.collider.gameObject;
 					// calibrate and toggle the value picker-slider
 					isPicking = true;
@@ -100,11 +100,16 @@ public class PlayerPaint : MonoBehaviour {
 					inputText.text = Mathf.RoundToInt(brushColor.r*100f).ToString();
 				
 				// hit okay button - confirm value and hide picker
-				} else if (hit.collider != null && hit.collider.gameObject == pickerButton) {
+				} else if (hit.collider != null && hit.collider.gameObject.tag != "Picker" && hit.collider.gameObject != gameOverButton) {
 					isPicking = false;
 					picker.SetActive (false);
 					inputText.gameObject.SetActive (false);
 					lastSelected.GetComponent<MeshRenderer>().material.color = brushColor;
+//				} else if (hit.collider != null && hit.collider.gameObject == pickerButton) {
+//					isPicking = false;
+//					picker.SetActive (false);
+//					inputText.gameObject.SetActive (false);
+//					lastSelected.GetComponent<MeshRenderer>().material.color = brushColor;
 				
 				// hit gameover button - end round and tally score
 				} else if (hit.collider != null && hit.collider.gameObject == gameOverButton) {
