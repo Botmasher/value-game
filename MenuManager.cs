@@ -123,10 +123,13 @@ public class MenuManager : MonoBehaviour {
 
 
 	/**
-	 * 	Fade images in and out over time
+	 * 	Fade random images from list in and out over time
 	 */
 	IEnumerator CyclePics () {
+		// choose a new image
 		Image nextPic = pics[Random.Range(0,pics.Count)];
+
+		// if image is different than the current, slowly fade in then out
 		if (thisPic != nextPic || thisPic == null) {
 			thisPic = nextPic;
 			thisPic.CrossFadeAlpha (0.28f, 4f, false);
@@ -134,6 +137,8 @@ public class MenuManager : MonoBehaviour {
 			thisPic.CrossFadeAlpha (0f, 4f, false);
 			yield return new WaitForSeconds (6f);
 		}
+
+		// rerun (either because images were same or this finished fading out)
 		StartCoroutine ("CyclePics");
 		yield return null;
 	}
