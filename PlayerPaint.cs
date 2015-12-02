@@ -80,6 +80,8 @@ public class PlayerPaint : MonoBehaviour {
 			// turn on the end round button at the start of your turn
 			if (!gameOverButton.activeSelf && !isPicking) {
 				gameOverButton.SetActive (true);
+				// play putting things on screen sound
+				AudioManager.playSfx_Wings = true;
 			}
 
 			// toggle value picker
@@ -91,6 +93,8 @@ public class PlayerPaint : MonoBehaviour {
 				if (hit.collider != null && hit.collider.tag == "Paint" && !isPicking) {
 					// remember the clicked object
 					lastSelected = hit.collider.gameObject;
+					// play picker coming on screen sound
+					AudioManager.playSfx_Wings = true;
 					// calibrate and toggle the value picker-slider
 					isPicking = true;
 					picker.SetActive (true);
@@ -104,7 +108,9 @@ public class PlayerPaint : MonoBehaviour {
 					isPicking = false;
 					picker.SetActive (false);
 					inputText.gameObject.SetActive (false);
-					lastSelected.GetComponent<MeshRenderer>().material.color = brushColor;
+					if (lastSelected != null) {
+						lastSelected.GetComponent<MeshRenderer>().material.color = brushColor;
+					}
 //				} else if (hit.collider != null && hit.collider.gameObject == pickerButton) {
 //					isPicking = false;
 //					picker.SetActive (false);
@@ -113,6 +119,9 @@ public class PlayerPaint : MonoBehaviour {
 				
 				// hit gameover button - end round and tally score
 				} else if (hit.collider != null && hit.collider.gameObject == gameOverButton) {
+					// play button selection sound
+					AudioManager.playSfx_Wings = true;
+					// end the round
 					StartCoroutine ("EndRound");
 				}
 
@@ -179,6 +188,10 @@ public class PlayerPaint : MonoBehaviour {
 		// message user - tallying score
 		textCenter[1].CrossFadeAlpha (0f, 0f, false);
 		textCenter[1].text = "Tallying your score";
+
+		// play writing sound
+		AudioManager.playSfx_InkLong1 = true;
+
 		textCenter[1].CrossFadeAlpha (1f, 0.6f, false);
 		yield return new WaitForSeconds (1f);
 		textCenter[1].CrossFadeAlpha (0f, 0.5f, false);
@@ -197,16 +210,19 @@ public class PlayerPaint : MonoBehaviour {
 		for (int i=0; i<AutoValueChooser.trueValues.Length; i++) {
 
 			// display your value then wait
+			AudioManager.playSfx_InkShort = true;
 			textRight[i].text = string.Format("{0}", Mathf.RoundToInt(myValues[i]*100f));
 			yield return new WaitForSeconds(0.5f);
 
 			// display true value then wait
+			AudioManager.playSfx_InkShort = true;
 			textLeft[i].text = string.Format("{0}", Mathf.RoundToInt(AutoValueChooser.trueValues[i]*100f));
 			yield return new WaitForSeconds(0.5f);
 
 			// display difference
 //			textRight[i].text = "";
 //			textLeft[i].text = "";
+			AudioManager.playSfx_Tapping = true;
 			howMuchOff += Mathf.RoundToInt(Mathf.Abs (AutoValueChooser.trueValues[i] - myValues[i])*100f);
 			textCenter[i].text = string.Format("{0}", Mathf.RoundToInt(Mathf.Abs(AutoValueChooser.trueValues[i] - myValues[i])*100f));
 			yield return new WaitForSeconds(1.5f);
@@ -214,12 +230,16 @@ public class PlayerPaint : MonoBehaviour {
 
 		// display final score
 		textAnswer.text = string.Format("{0}", howMuchOff);
+		AudioManager.playSfx_Tapping = true;
 
+		// timed slow fade of text and overlay color
 		yield return new WaitForSeconds (1.2f);
 		screenFader.CrossFadeAlpha (1f, 2f, false);
 		yield return new WaitForSeconds (2f);
 		textAnswer.CrossFadeAlpha (0f, 1.8f, false);
 		yield return new WaitForSeconds (2f);
+
+		// return to title
 		Application.LoadLevel ("scene-menu");
 	}
 

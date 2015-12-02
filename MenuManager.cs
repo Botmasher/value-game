@@ -44,6 +44,7 @@ public class MenuManager : MonoBehaviour {
 			texts.Add (gameObject.GetComponentsInChildren<Text>()[i]);
 		}
 
+		// menu on until player starts game
 		isUsingMenu = true;
 
 	}
@@ -61,19 +62,25 @@ public class MenuManager : MonoBehaviour {
 
 			// hover over start
 			if (hit.collider.gameObject == startButton) {
+
 				texts[0].fontSize = 48;
 				texts[1].fontSize = 24;
 				// select start
 				if (Input.GetMouseButtonDown (0)) {
+					AudioManager.playSfx_Page = true;
 					StartCoroutine ("StartGame");
 				}
 			
 			// hover over about
 			} else if (hit.collider.gameObject == aboutButton) {
+
 				texts[1].fontSize = 30;
 				texts[0].fontSize = 45;
 				// select about
 				if (Input.GetMouseButtonDown(0)) {
+
+					AudioManager.playSfx_Wings = true;
+
 					Application.OpenURL("https://www.youtube.com/watch?v=J5zVFlMQZEs");
 				}
 			}
@@ -114,9 +121,12 @@ public class MenuManager : MonoBehaviour {
 		// turn off menu - partially to avoid calling this routine twice
 		isUsingMenu = false;
 
+		// start fading music out
+		AudioManager.fadeMusicOut = true;
+
 		// fade in overlay image
-		screenFader.CrossFadeAlpha (1f, 1.1f, false);;
-		yield return new WaitForSeconds (1.3f);
+		screenFader.CrossFadeAlpha (1f, 1.1f, false);
+		yield return new WaitForSeconds (2f);
 		Application.LoadLevel ("scene-main");
 
 	}
