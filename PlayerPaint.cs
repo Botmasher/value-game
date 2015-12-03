@@ -80,14 +80,26 @@ public class PlayerPaint : MonoBehaviour {
 			// turn on the end round button at the start of your turn
 			if (!gameOverButton.activeSelf && !isPicking) {
 				gameOverButton.SetActive (true);
+				textAnswer.text = "Judge me!";
 				// play putting things on screen sound
 				AudioManager.playSfx_Wings = true;
 			}
 
+			ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+			Physics.Raycast(ray, out hit);
+
+			// hit gameover button - end round and tally score
+			if (hit.collider != null && hit.collider.gameObject == gameOverButton) {
+				if (Input.GetMouseButtonDown(0)) {
+					// play button selection sound
+					AudioManager.playSfx_Wings = true;
+					// end the round
+					StartCoroutine ("EndRound");
+				}
+			}
+
 			// toggle value picker
 			if (Input.GetMouseButtonDown(0)) {
-				ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-				Physics.Raycast(ray, out hit);
 
 				// hit paint target - bring up picker and remember this object
 				if (hit.collider != null && hit.collider.tag == "Paint" && !isPicking) {
@@ -99,7 +111,10 @@ public class PlayerPaint : MonoBehaviour {
 					isPicking = true;
 					picker.SetActive (true);
 					inputText.gameObject.SetActive (true);
+
 					gameOverButton.SetActive (false);
+					textAnswer.text = "";
+					
 					brushColor = lastSelected.GetComponent<MeshRenderer>().material.color;
 					inputText.text = Mathf.RoundToInt(brushColor.r*100f).ToString();
 				
@@ -111,19 +126,12 @@ public class PlayerPaint : MonoBehaviour {
 					if (lastSelected != null) {
 						lastSelected.GetComponent<MeshRenderer>().material.color = brushColor;
 					}
+				}
 //				} else if (hit.collider != null && hit.collider.gameObject == pickerButton) {
 //					isPicking = false;
 //					picker.SetActive (false);
 //					inputText.gameObject.SetActive (false);
 //					lastSelected.GetComponent<MeshRenderer>().material.color = brushColor;
-				
-				// hit gameover button - end round and tally score
-				} else if (hit.collider != null && hit.collider.gameObject == gameOverButton) {
-					// play button selection sound
-					AudioManager.playSfx_Wings = true;
-					// end the round
-					StartCoroutine ("EndRound");
-				}
 
 //			// drag mouse along value picker - update this color based on exact value texture pixel
 //			} else if (Input.GetMouseButton(0)) {
@@ -183,6 +191,7 @@ public class PlayerPaint : MonoBehaviour {
 		// turn off gameplay elements
 		myTurn = false;
 		gameOverButton.SetActive (false);
+		textAnswer.text = "";
 		midlineImage.SetActive (false);
 
 		// message user - tallying score
